@@ -1,7 +1,7 @@
 ﻿/**
- * Poker Hand Evaluator - Pair Detection
+ * Poker Hand Evaluator - Complete Implementation
  * 
- * Now with pair, three of a kind, four of a kind, and full house detection.
+ * Now with all 10 poker hand rankings including flush, straight, and royal flush.
  */
 
 const RANK_VALUES = {
@@ -23,7 +23,6 @@ const HAND_RANKINGS = {
 };
 
 function validateHand(cards) {
-  // Same validation as before
   if (!cards || !Array.isArray(cards)) {
     return { isValid: false, error: "Cards must be an array" };
   }
@@ -52,7 +51,6 @@ function validateHand(cards) {
   return { isValid: true, error: null };
 }
 
-// NEW: Helper function to count ranks
 function getRankCounts(cards) {
   const counts = {};
   cards.forEach(card => {
@@ -61,12 +59,41 @@ function getRankCounts(cards) {
   return counts;
 }
 
-// NEW: Helper function to get count pattern
 function getCountPattern(rankCounts) {
   return Object.values(rankCounts).sort((a, b) => b - a);
 }
 
-// UPDATED: Evaluate with pair detection
+// NEW: Flush detection
+function isFlush(cards) {
+  const firstSuit = cards[0].suit;
+  return cards.every(card => card.suit === firstSuit);
+}
+
+// NEW: Straight detection
+function isStraight(cards) {
+  const values = cards.map(card => RANK_VALUES[card.rank]).sort((a, b) => a - b);
+  
+  // Regular straight
+  let isConsecutive = true;
+  for (let i = 1; i < values.length; i++) {
+    if (values[i] !== values[i - 1] + 1) {
+      isConsecutive = false;
+      break;
+    }
+  }
+  if (isConsecutive) return true;
+  
+  // Ace-low straight (wheel)
+  const isWheel = values[0] === 2 && values[1] === 3 && 
+                  values[2] === 4 && values[3] === 5 && values[4] === 14;
+  return isWheel;
+}
+
+// NEW: Get highest card
+function getHighCard(cards) {
+  return Math.max(...cards.map(card => RANK_VALUES[card.rank]));
+}
+
 function evaluateHand(cards) {
   const validation = validateHand(cards);
   if (!validation.isValid) {
@@ -75,6 +102,30 @@ function evaluateHand(cards) {
 
   const rankCounts = getRankCounts(cards);
   const countPattern = getCountPattern(rankCounts);
+  const flush = isFlush(cards);
+  const straight = isStraight(cards);
+  const highCard = getHighCard(cards);
+
+  // Check for Royal Flush
+  if (flush && straight && highCard === 14) {
+    const sortedRanks = cards.map(c => RANK_VALUES[c.rank]).sort((a, b) => b - a);
+    if (sortedRanks[0] === 14 && sortedRanks[4] === 10) {
+      return {
+        rank: HAND_RANKINGS.ROYAL_FLUSH,
+        handName: "Royal Flush",
+        description: "A-K-Q-J-10 of the same suit - the best possible hand!"
+      };
+    }
+  }
+
+  // Check for Straight Flush
+  if (flush && straight) {
+    return {
+      rank: HAND_RANKINGS.STRAIGHT_FLUSH,
+      handName: "Straight Flush",
+      description: "Five consecutive cards of the same suit"
+    };
+  }
 
   // Check for Four of a Kind
   if (countPattern[0] === 4) {
@@ -91,6 +142,24 @@ function evaluateHand(cards) {
       rank: HAND_RANKINGS.FULL_HOUSE,
       handName: "Full House",
       description: "Three of a kind plus a pair"
+    };
+  }
+
+  // Check for Flush
+  if (flush) {
+    return {
+      rank: HAND_RANKINGS.FLUSH,
+      handName: "Flush",
+      description: "Five cards of the same suit"
+    };
+  }
+
+  // Check for Straight
+  if (straight) {
+    return {
+      rank: HAND_RANKINGS.STRAIGHT,
+      handName: "Straight",
+      description: "Five consecutive cards of different suits"
     };
   }
 
@@ -121,7 +190,7 @@ function evaluateHand(cards) {
     };
   }
 
-  // High Card (no matching cards)
+  // High Card
   return {
     rank: HAND_RANKINGS.HIGH_CARD,
     handName: "High Card",
