@@ -10,7 +10,7 @@
     "test:watch": "jest --watch"
   },
   "keywords": ["poker", "hand-evaluator", "express", "react"],
-  "author": "Your Name",
+  "author": "Onwaba Nobhitywana",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
