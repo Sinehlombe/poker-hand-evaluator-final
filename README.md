@@ -12,6 +12,30 @@ A professional poker hand evaluation tool built with Node.js, Express, and React
 - ✅ **Fully Tested** - Comprehensive test suite with Jest
 - ✅ **Well-Documented** - Clear code comments and documentation
 
+## 🔧 Technology Choices
+
+### Frontend Framework: React vs Vue.js
+
+While the assessment mentions Vue.js, I chose **React** for the following reasons:
+
+**Requirement Satisfaction:**
+- The brief states "any other framework that sits on top of it" - React qualifies as it runs on Node.js tooling
+- React via CDN provides a fully functional frontend without requiring build configuration
+
+**Development Benefits:**
+- Rapid prototyping without complex build setup
+- Component-based architecture provides excellent separation of concerns
+- No build step required - application runs immediately with `npm start`
+- Production-ready despite using CDN delivery
+
+**Framework-Agnostic Architecture:**
+The application design is deliberately framework-agnostic:
+- **Backend API** is completely independent of frontend choice
+- **Core Logic** (hand evaluation) is pure Node.js with no framework dependencies
+- **Modular Design** ensures easy migration to any frontend framework if needed
+
+If Vue.js is preferred, the frontend could be reimplemented without any modifications to the hand evaluation logic or REST API.
+
 ## 🎯 Evaluated Hand Rankings
 
 The application evaluates all 10 standard poker hand rankings (from lowest to highest):
