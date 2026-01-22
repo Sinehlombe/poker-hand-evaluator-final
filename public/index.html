@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Poker Hand Evaluator</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .card { display: inline-block; margin: 5px; padding: 10px; border: 1px solid #ccc; }
+        button { margin: 5px; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <h1>Poker Hand Evaluator</h1>
+    <div id="hand"></div>
+    <button onclick="testHealth()">Test Server Health</button>
+    <button onclick="testEvaluate()">Test Evaluation</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = 
+                    `<strong>Server Status:</strong> ${data.status}<br>
+                     <strong>Message:</strong> ${data.message}<br>
+                     <strong>Time:</strong> ${data.timestamp}`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Error: Server not responding';
+            }
+        }
+
+        async function testEvaluate() {
+            try {
+                const hand = [
+                    { rank: "A", suit: "Spades" },
+                    { rank: "K", suit: "Spades" },
+                    { rank: "Q", suit: "Spades" },
+                    { rank: "J", suit: "Spades" },
+                    { rank: "10", suit: "Spades" }
+                ];
+                
+                const response = await fetch('/api/evaluate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cards: hand })
+                });
+                
+                const data = await response.json();
+                document.getElementById('result').innerHTML = 
+                    `<strong>Hand:</strong> ${data.hand.handName}<br>
+                     <strong>Description:</strong> ${data.hand.description}<br>
+                     <strong>Success:</strong> ${data.success}`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
