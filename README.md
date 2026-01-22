@@ -63,7 +63,7 @@ The application evaluates all 10 standard poker hand rankings (from lowest to hi
 1. **Clone or download the repository**
 ```bash
 git clone <your-repo-url>
-cd poker-hand-evaluator
+cd poker-hand-evaluator-final
 ```
 
 2. **Install dependencies**
@@ -230,7 +230,7 @@ This request should return a "Two Pair" result.
 ## 🏗️ Project Structure
 
 ```
-poker-hand-evaluator/
+poker-hand-evaluator-final/
 ├── src/
 │   └── backend/
 │       ├── server.js                 # Express server setup and routes
