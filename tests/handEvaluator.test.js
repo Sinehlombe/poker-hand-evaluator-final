@@ -70,15 +70,33 @@ describe("Hand Validation", () => {
       expect(result.error).toContain("Invalid suit");
     });
 
-    test("should accept all valid ranks (2-A)", () => {
-      const validRanks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
-      validRanks.forEach(rank => {
+    test("should accept all valid ranks from 2 to K", () => {
+      const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10"];
+      
+      ranks.forEach((rank, index) => {
+        const suit = ["Hearts", "Diamonds", "Clubs", "Spades"][index % 4];
+        const hand = [
+          { rank: rank, suit: suit },
+          { rank: "A", suit: ["Diamonds", "Clubs", "Spades", "Hearts"][index % 4] },
+          { rank: "K", suit: ["Clubs", "Spades", "Hearts", "Diamonds"][index % 4] },
+          { rank: "Q", suit: ["Spades", "Hearts", "Diamonds", "Clubs"][index % 4] },
+          { rank: "J", suit: ["Hearts", "Diamonds", "Clubs", "Spades"][(index + 1) % 4] }
+        ];
+        const result = validateHand(hand);
+        expect(result.isValid).toBe(true);
+      });
+    });
+
+    test("should accept face cards (J, Q, K, A)", () => {
+      const faceCards = ["J", "Q", "K", "A"];
+      
+      faceCards.forEach((rank, index) => {
         const hand = [
           { rank: rank, suit: "Hearts" },
-          { rank: "K", suit: "Diamonds" },
-          { rank: "Q", suit: "Clubs" },
-          { rank: "J", suit: "Spades" },
-          { rank: "10", suit: "Hearts" }
+          { rank: "10", suit: "Diamonds" },
+          { rank: "9", suit: "Clubs" },
+          { rank: "8", suit: "Spades" },
+          { rank: "7", suit: ["Hearts", "Diamonds", "Clubs", "Spades"][(index + 1) % 4] }
         ];
         const result = validateHand(hand);
         expect(result.isValid).toBe(true);
