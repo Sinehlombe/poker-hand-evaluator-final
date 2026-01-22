@@ -1,59 +1,260 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poker Hand Evaluator</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .card { display: inline-block; margin: 5px; padding: 10px; border: 1px solid #ccc; }
-        button { margin: 5px; padding: 10px 20px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0f4c3a 0%, #1a5c47 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; color: white; margin-bottom: 40px; }
+        h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .subtitle { font-size: 1.2em; opacity: 0.9; }
+        .main-card { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .card-selector { margin-bottom: 30px; }
+        .card-selector h2 { color: #0f4c3a; margin-bottom: 20px; font-size: 1.5em; }
+        .cards-display { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+        .card { width: 120px; height: 170px; border: 3px solid #ddd; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; cursor: pointer; transition: all 0.3s; position: relative; }
+        .card.selected { border-color: #0f4c3a; box-shadow: 0 4px 15px rgba(15, 76, 58, 0.4); transform: translateY(-5px); }
+        .card.empty { background: #f5f5f5; border-style: dashed; }
+        .card-rank { font-size: 2em; font-weight: bold; }
+        .card-suit { font-size: 2.5em; }
+        .card.hearts .card-rank, .card.diamonds .card-rank, .card.hearts .card-suit, .card.diamonds .card-suit { color: #dc143c; }
+        .card.spades .card-rank, .card.clubs .card-rank, .card.spades .card-suit, .card.clubs .card-suit { color: #000; }
+        .card-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .control-group { background: #f8f9fa; padding: 20px; border-radius: 10px; }
+        .control-group h3 { color: #0f4c3a; margin-bottom: 15px; font-size: 1.1em; }
+        .button-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; transition: all 0.3s; font-weight: 600; }
+        .btn-rank, .btn-suit { background: white; border: 2px solid #ddd; flex: 1; min-width: 60px; }
+        .btn-rank:hover, .btn-suit:hover { border-color: #0f4c3a; background: #f0f0f0; }
+        .btn-rank.active, .btn-suit.active { background: #0f4c3a; color: white; border-color: #0f4c3a; }
+        .btn-primary { background: #0f4c3a; color: white; padding: 15px 40px; font-size: 1.1em; }
+        .btn-primary:hover:not(:disabled) { background: #1a5c47; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .action-buttons { display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; }
+        .result { background: linear-gradient(135deg, #0f4c3a 0%, #1a5c47 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; }
+        .result h2 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .result p { font-size: 1.3em; opacity: 0.95; }
+        .error { background: #dc3545; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .examples { margin-top: 30px; padding-top: 30px; border-top: 2px solid #e9ecef; }
+        .examples h3 { color: #0f4c3a; margin-bottom: 20px; }
+        .example-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-example { background: #e9ecef; color: #0f4c3a; border: 2px solid #dee2e6; }
+        .btn-example:hover { background: #dee2e6; border-color: #0f4c3a; }
+        .loading { text-align: center; padding: 20px; color: #6c757d; }
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .card-controls { grid-template-columns: 1fr; }
+            .cards-display { gap: 10px; }
+            .card { width: 80px; height: 110px; }
+            .card-rank { font-size: 1.5em; }
+            .card-suit { font-size: 2em; }
+        }
     </style>
 </head>
 <body>
-    <h1>Poker Hand Evaluator</h1>
-    <div id="hand"></div>
-    <button onclick="testHealth()">Test Server Health</button>
-    <button onclick="testEvaluate()">Test Evaluation</button>
-    <div id="result"></div>
-    
-    <script>
-        async function testHealth() {
-            try {
-                const response = await fetch('/api/health');
-                const data = await response.json();
-                document.getElementById('result').innerHTML = 
-                    `<strong>Server Status:</strong> ${data.status}<br>
-                     <strong>Message:</strong> ${data.message}<br>
-                     <strong>Time:</strong> ${data.timestamp}`;
-            } catch (error) {
-                document.getElementById('result').innerHTML = 'Error: Server not responding';
-            }
-        }
+    <div id="root"></div>
 
-        async function testEvaluate() {
-            try {
-                const hand = [
-                    { rank: "A", suit: "Spades" },
-                    { rank: "K", suit: "Spades" },
-                    { rank: "Q", suit: "Spades" },
-                    { rank: "J", suit: "Spades" },
-                    { rank: "10", suit: "Spades" }
-                ];
+    <script type="text/babel">
+        const { useState } = React;
+        
+        const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
+        const SUIT_SYMBOLS = { 'Hearts': '♥', 'Diamonds': '♦', 'Clubs': '♣', 'Spades': '♠' };
+        
+        function App() {
+            const [cards, setCards] = useState(Array(5).fill(null));
+            const [selectedCardIndex, setSelectedCardIndex] = useState(0);
+            const [selectedRank, setSelectedRank] = useState(null);
+            const [selectedSuit, setSelectedSuit] = useState(null);
+            const [result, setResult] = useState(null);
+            const [error, setError] = useState(null);
+            const [loading, setLoading] = useState(false);
+            
+            const handleAddCard = () => {
+                if (selectedRank && selectedSuit) {
+                    const newCards = [...cards];
+                    newCards[selectedCardIndex] = { rank: selectedRank, suit: selectedSuit };
+                    setCards(newCards);
+                    
+                    const nextEmptyIndex = newCards.findIndex((card, idx) => idx > selectedCardIndex && card === null);
+                    if (nextEmptyIndex !== -1) setSelectedCardIndex(nextEmptyIndex);
+                    
+                    setSelectedRank(null);
+                    setSelectedSuit(null);
+                    setError(null);
+                    setResult(null);
+                }
+            };
+            
+            const handleEvaluate = async () => {
+                if (cards.some(card => card === null)) {
+                    setError('Please select all 5 cards before evaluating');
+                    return;
+                }
                 
-                const response = await fetch('/api/evaluate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cards: hand })
-                });
+                setLoading(true);
+                setError(null);
+                setResult(null);
                 
-                const data = await response.json();
-                document.getElementById('result').innerHTML = 
-                    `<strong>Hand:</strong> ${data.hand.handName}<br>
-                     <strong>Description:</strong> ${data.hand.description}<br>
-                     <strong>Success:</strong> ${data.success}`;
-            } catch (error) {
-                document.getElementById('result').innerHTML = 'Error: ' + error.message;
-            }
+                try {
+                    const response = await fetch('/api/evaluate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ cards })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        setResult(data.hand);
+                    } else {
+                        setError(data.error || 'Failed to evaluate hand');
+                    }
+                } catch (err) {
+                    setError('Unable to connect to server. Make sure the server is running.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
+            const handleReset = () => {
+                setCards(Array(5).fill(null));
+                setSelectedCardIndex(0);
+                setSelectedRank(null);
+                setSelectedSuit(null);
+                setResult(null);
+                setError(null);
+            };
+            
+            const loadExample = (exampleCards) => {
+                setCards(exampleCards);
+                setSelectedCardIndex(0);
+                setSelectedRank(null);
+                setSelectedSuit(null);
+                setResult(null);
+                setError(null);
+            };
+            
+            return (
+                <div className="container">
+                    <header>
+                        <h1>🃏 Poker Hand Evaluator</h1>
+                        <p className="subtitle">Select 5 cards to evaluate your poker hand</p>
+                    </header>
+                    
+                    <div className="main-card">
+                        {error && (
+                            <div className="error">
+                                <strong>Error:</strong> {error}
+                            </div>
+                        )}
+                        
+                        <div className="card-selector">
+                            <h2>Your Hand</h2>
+                            <div className="cards-display">
+                                {cards.map((card, index) => (
+                                    <div key={index} className={`card ${card ? card.suit.toLowerCase() : 'empty'} ${selectedCardIndex === index ? 'selected' : ''}`} onClick={() => setSelectedCardIndex(index)}>
+                                        {card ? (
+                                            <>
+                                                <div className="card-rank">{card.rank}</div>
+                                                <div className="card-suit">{SUIT_SYMBOLS[card.suit]}</div>
+                                            </>
+                                        ) : (
+                                            <div style={{color: '#999', fontSize: '3em'}}>?</div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div className="card-controls">
+                            <div className="control-group">
+                                <h3>Select Rank</h3>
+                                <div className="button-group">
+                                    {RANKS.map(rank => (
+                                        <button key={rank} className={`btn btn-rank ${selectedRank === rank ? 'active' : ''}`} onClick={() => setSelectedRank(rank)}>
+                                            {rank}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <div className="control-group">
+                                <h3>Select Suit</h3>
+                                <div className="button-group">
+                                    {SUITS.map(suit => (
+                                        <button key={suit} className={`btn btn-suit ${selectedSuit === suit ? 'active' : ''}`} onClick={() => setSelectedSuit(suit)}>
+                                            {SUIT_SYMBOLS[suit]} {suit}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="action-buttons">
+                            <button className="btn btn-primary" onClick={handleAddCard} disabled={!selectedRank || !selectedSuit}>
+                                {cards[selectedCardIndex] ? 'Update Card' : 'Add Card'}
+                            </button>
+                            <button className="btn btn-primary" onClick={handleEvaluate} disabled={cards.some(card => card === null) || loading}>
+                                {loading ? 'Evaluating...' : 'Evaluate Hand'}
+                            </button>
+                            <button className="btn btn-secondary" onClick={handleReset}>Reset</button>
+                        </div>
+                        
+                        {result && (
+                            <div className="result">
+                                <h2>{result.handName}</h2>
+                                <p>{result.description}</p>
+                            </div>
+                        )}
+                        
+                        <div className="examples">
+                            <h3>Try Example Hands</h3>
+                            <div className="example-buttons">
+                                <button className="btn btn-example" onClick={() => loadExample([
+                                    { rank: 'A', suit: 'Spades' },
+                                    { rank: 'K', suit: 'Spades' },
+                                    { rank: 'Q', suit: 'Spades' },
+                                    { rank: 'J', suit: 'Spades' },
+                                    { rank: '10', suit: 'Spades' }
+                                ])}>Royal Flush</button>
+                                <button className="btn btn-example" onClick={() => loadExample([
+                                    { rank: 'K', suit: 'Hearts' },
+                                    { rank: 'K', suit: 'Diamonds' },
+                                    { rank: 'K', suit: 'Clubs' },
+                                    { rank: 'K', suit: 'Spades' },
+                                    { rank: '3', suit: 'Hearts' }
+                                ])}>Four of a Kind</button>
+                                <button className="btn btn-example" onClick={() => loadExample([
+                                    { rank: 'A', suit: 'Hearts' },
+                                    { rank: 'A', suit: 'Diamonds' },
+                                    { rank: 'A', suit: 'Clubs' },
+                                    { rank: '8', suit: 'Spades' },
+                                    { rank: '8', suit: 'Hearts' }
+                                ])}>Full House</button>
+                                <button className="btn btn-example" onClick={() => loadExample([
+                                    { rank: 'A', suit: 'Spades' },
+                                    { rank: '10', suit: 'Clubs' },
+                                    { rank: '10', suit: 'Hearts' },
+                                    { rank: '3', suit: 'Diamonds' },
+                                    { rank: '3', suit: 'Spades' }
+                                ])}>Two Pair</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
         }
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
 </html>
