@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "poker-hand-evaluator",
   "version": "1.0.0",
   "description": "A poker hand evaluation tool with Express backend and React frontend",
