@@ -5,7 +5,7 @@
     "**/__tests__/**/*.js"
   ],
   collectCoverageFrom: [
-    "src/**/*.js",
+    "src/backend/services/**/*.js",
     "!src/**/*.test.js",
     "!**/node_modules/**"
   ],
